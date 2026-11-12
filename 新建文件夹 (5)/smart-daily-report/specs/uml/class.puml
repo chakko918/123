@@ -1,0 +1,90 @@
+@startuml class
+' 智能日报生成器 —— 类图（附件，工具绘制）
+
+class Activity {
+  - source: str
+  - member: str
+  - happened_at: datetime
+  - summary: str
+  - kind: str
+}
+
+enum ActivityKind {
+  COMMIT
+  TASK
+  MESSAGE
+}
+
+class Member {
+  - name: str
+  - github: str
+  - feishu: str
+}
+
+class DailyReport {
+  - date: str
+  - entries: list[ReportEntry]
+}
+
+class ReportEntry {
+  - member: str
+  - items: list[str]
+}
+
+class Config {
+  - github_token: str
+  - github_repo: str
+  - members: list[Member]
+  - smtp_*: str
+  - mock: bool
+  + from_env(): Config
+}
+
+abstract class Collector {
+  + source: str
+  + collect(since, until): list[Activity]
+}
+
+class GitHubCollector
+class FeishuTaskCollector
+class FeishuMessageCollector
+
+abstract class Pusher {
+  + channel: str
+  + push(content, date): bool
+}
+
+class EmailPusher
+class FeishuBotPusher
+
+class ReportGenerator {
+  + generate(activities, members, date): DailyReport
+  + render(report): str
+}
+
+class Database {
+  + init_db()
+  + save_report(date, content, channels)
+  + list_history(): list
+}
+
+class Main {
+  + run(args): int
+}
+
+Collector <|-- GitHubCollector
+Collector <|-- FeishuTaskCollector
+Collector <|-- FeishuMessageCollector
+Pusher <|-- EmailPusher
+Pusher <|-- FeishuBotPusher
+
+Collector ..> Activity
+ReportGenerator ..> DailyReport
+DailyReport *-- ReportEntry
+ReportGenerator ..> Member
+Main --> Collector
+Main --> Pusher
+Main --> ReportGenerator
+Main --> Database
+Main --> Config
+@enduml

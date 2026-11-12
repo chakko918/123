@@ -1,0 +1,40 @@
+@startuml usecase
+' 智能日报生成器 —— 用例图（附件，工具绘制）
+left to right direction
+skinparam actorStyle awesome
+
+actor "成员（工程师）" as Member
+actor "组长" as Lead
+actor "GitHub API" as GH <<外部系统>>
+actor "飞书开放平台" as FS <<外部系统>>
+actor "SMTP / 飞书机器人" as Push <<外部系统>>
+
+rectangle "智能日报生成器" {
+  usecase "采集 GitHub 提交" as UC1
+  usecase "采集飞书任务" as UC2
+  usecase "采集飞书群消息" as UC3
+  usecase "生成个人日报条目" as UC4
+  usecase "协作成果自动归属" as UC5
+  usecase "生成团队日报" as UC6
+  usecase "邮件推送日报" as UC7
+  usecase "飞书机器人推送" as UC8
+  usecase "保存并查询日报历史" as UC9
+}
+
+Member --> UC1
+Member --> UC2
+Member --> UC3
+Lead --> UC6
+Lead --> UC7
+Lead --> UC8
+Lead --> UC9
+
+UC1 --> GH
+UC2 --> FS
+UC3 --> FS
+UC4 ..> UC5 : <<include>>
+UC6 ..> UC4 : <<include>>
+UC6 ..> UC5 : <<include>>
+UC7 --> Push
+UC8 --> Push
+@enduml

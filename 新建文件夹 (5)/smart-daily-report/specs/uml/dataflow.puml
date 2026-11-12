@@ -1,0 +1,34 @@
+@startuml dataflow
+' 智能日报生成器 —— 泳道图（数据流/流程，附件，工具绘制）
+|#lightblue|主编排|
+|#lightgreen|采集层|
+|#lightyellow|生成层|
+|#lightpink|推送层|
+|#lightgray|数据层|
+
+|主编排|
+start
+:解析 CLI 参数并装配 Config;
+|采集层|
+:GitHubCollector.collect(since, until);
+note right: 无凭证降级 mock
+:FeishuTaskCollector.collect(...);
+:FeishuMessageCollector.collect(...);
+note right: 单源异常 → 空列表 + 日志
+|生成层|
+:ReportGenerator.generate(activities, members, date);
+note right: 协作成果自动归属\n无活动成员生成兜底条目
+:render(report) → Markdown 文本;
+|推送层|
+fork
+  :EmailPusher.push(content, date);
+fork again
+  :FeishuBotPusher.push(content, date);
+end fork
+note right: 通道独立成败\n未配置时 dry-run
+|数据层|
+:Database.save_report(date, content, channels);
+|主编排|
+:汇总推送结果并打印;
+stop
+@enduml

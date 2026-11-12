@@ -1,0 +1,29 @@
+@startuml er
+' 智能日报生成器 —— ER 图（附件，工具绘制）
+entity "reports" as reports {
+  * id : INTEGER <<PK, auto>>
+  --
+  * date : TEXT <<UNIQUE>>
+  * content : TEXT
+  * channels : TEXT
+  * created_at : TEXT
+}
+
+entity "activity (内存)" as activity {
+  * source : TEXT
+  * member : TEXT
+  * happened_at : DATETIME
+  * summary : TEXT
+  * kind : TEXT
+}
+
+entity "member (内存)" as member {
+  * name : TEXT
+  * github : TEXT
+  * feishu : TEXT
+}
+
+' 运行期对象 Activity/Member 由采集器产生，聚合为日报 content 后落库
+activity }o--|| member : 归属
+reports : 存储每日生成的日报全文\n（content 为聚合后的 Markdown）
+@enduml
